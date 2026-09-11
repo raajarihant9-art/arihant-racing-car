@@ -1,45 +1,147 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arihant Car Racing</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <h1>??? Arihant Car Racing</h1>
+const player = document.getElementById("player");
+const enemy = document.getElementById("enemy");
+const scoreText = document.getElementById("score");
 
-  <div class="game-wrap">
-    <div id="game">
-      <div id="road">
-        <div class="line l1"></div>
-        <div class="line l2"></div>
-        <div class="line l3"></div>
+const startScreen = document.getElementById("startScreen");
+const gameOver = document.getElementById("gameOver");
+const finalScore = document.getElementById("finalScore");
 
-        <div id="player" class="car">??</div>
-        <div id="enemy" class="car enemy">??</div>
-        <div id="score">Score: 0</div>
+const startBtn = document.getElementById("startBtn");
+const restartBtn = document.getElementById("restartBtn");
 
-        <div id="startScreen">
-          <h2>?? Car Racing</h2>
-          <p>Arrow keys / buttons se car chalao</p>
-          <button id="startBtn">START GAME</button>
-        </div>
+const leftBtn = document.getElementById("leftBtn");
+const rightBtn = document.getElementById("rightBtn");
 
-        <div id="gameOver" class="hidden">
-          <h2>?? GAME OVER</h2>
-          <p id="finalScore">Score: 0</p>
-          <button id="restartBtn">RESTART</button>
-        </div>
-      </div>
-    </div>
+let playerX = 50;
+let enemyY = -100;
+let score = 0;
+let gameRunning = false;
 
-    <div class="controls">
-      <button id="leftBtn">??</button>
-      <button id="rightBtn">??</button>
-    </div>
-  </div>
+const speed = 0.7;
+const moveSpeed = 5;
 
-  <script src="script.js"></script>
-</body>
-</html>
+
+// GAME START
+function startGame() {
+  playerX = 50;
+  enemyY = -100;
+  score = 0;
+
+  player.style.left = playerX + "%";
+  enemy.style.top = enemyY + "px";
+
+  scoreText.textContent = "Score: 0";
+
+  startScreen.style.display = "none";
+  gameOver.classList.add("hidden");
+
+  gameRunning = true;
+
+  requestAnimationFrame(gameLoop);
+}
+
+
+// PLAYER MOVEMENT
+function moveLeft() {
+  if (!gameRunning) return;
+
+  playerX -= moveSpeed;
+
+  if (playerX < 10) {
+    playerX = 10;
+  }
+
+  player.style.left = playerX + "%";
+}
+
+function moveRight() {
+  if (!gameRunning) return;
+
+  playerX += moveSpeed;
+
+  if (playerX > 90) {
+    playerX = 90;
+  }
+
+  player.style.left = playerX + "%";
+}
+
+
+// KEYBOARD
+document.addEventListener("keydown", function(event) {
+
+  if (event.key === "ArrowLeft") {
+    moveLeft();
+  }
+
+  if (event.key === "ArrowRight") {
+    moveRight();
+  }
+
+});
+
+
+// MOBILE BUTTONS
+leftBtn.addEventListener("click", moveLeft);
+rightBtn.addEventListener("click", moveRight);
+
+
+// ENEMY + GAME LOOP
+function gameLoop() {
+
+  if (!gameRunning) return;
+
+  enemyY += speed;
+
+  enemy.style.top = enemyY + "px";
+
+  // Enemy screen ke neeche chala gaya
+  if (enemyY > 600) {
+
+    enemyY = -100;
+
+    // Random position
+    enemy.style.left = (10 + Math.random() * 80) + "%";
+
+    score++;
+
+    scoreText.textContent = "Score: " + score;
+  }
+
+
+  // COLLISION
+  const playerRect = player.getBoundingClientRect();
+  const enemyRect = enemy.getBoundingClientRect();
+
+  if (
+    playerRect.left < enemyRect.right &&
+    playerRect.right > enemyRect.left &&
+    playerRect.top < enemyRect.bottom &&
+    playerRect.bottom > enemyRect.top
+  ) {
+
+    endGame();
+    return;
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+
+// GAME OVER
+function endGame() {
+
+  gameRunning = false;
+
+  finalScore.textContent = "Score: " + score;
+
+  gameOver.classList.remove("hidden");
+}
+
+
+// START BUTTON
+startBtn.addEventListener("click", startGame);
+
+
+// RESTART BUTTON
+restartBtn.addEventListener("click", startGame);
